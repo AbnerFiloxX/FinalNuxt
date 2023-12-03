@@ -5,7 +5,7 @@
                 <ui-Schedule />
             </v-col>
             <v-col cols="20">
-                AUN NO SE HACE NADA
+                AUN NO SE LE HACE NADA AL CALENDARIO COMO TAL
             </v-col>
         </v-row>
     </div>
