@@ -4,9 +4,6 @@
             <v-col>
                <ui-usuarios />
             </v-col>
-            <v-col>
-               <ui-barra />
-            </v-col>
         </v-row>
     </div>
 </template>
