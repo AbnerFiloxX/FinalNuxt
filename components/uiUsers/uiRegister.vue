@@ -1,11 +1,13 @@
 <template>
-  <v-form ref="frmRegistro" v-model="frmRegistro">
+  <v-form ref="frmCitas" v-model="frmCitas">
     <v-app>
       <v-app-bar app color="white" dark>
-        <v-toolbar-title class="black--text font-weight-bold">Doctor</v-toolbar-title>
-        <v-icon class="mr-2 grey--text"> mdi-chevron-right</v-icon>
+        <v-toolbar-title class="black--text font-weight-bold">
+          Doctor
+        </v-toolbar-title>
+        <v-icon class="mr-2 grey--text">mdi-chevron-right</v-icon>
         <v-toolbar-title class="black--text">{{ pageTitle }}</v-toolbar-title>
-        <v-icon class="mr-2 green--text ml-auto"> mdi mdi-bell-badge</v-icon>
+        <v-icon class="mr-2 green--text ml-auto">mdi mdi-bell-badge</v-icon>
         <v-card class="pa-0.8 rounded-xl" color="green">
           <v-avatar size="38">
             <v-img :src="require('/assets/images/Dra.jpg')" alt="Foto"></v-img>
@@ -13,262 +15,92 @@
           <span class="mr-7 white--text">Available</span>
         </v-card>
       </v-app-bar>
-      <v-btn depressed color="primary" @click="openForm">
-    Agregar nuevo cita
-  </v-btn>
-      <v-dialog v-model="showFormDialog" max-width="600">
-    <v-card>
-      <v-card-title class="text-h5">
-        nueva cita
-      </v-card-title>
-      <v-card-text>
-        <v-row align="center">
-          <label for="">Nombre(s):</label>
-          <v-text-field
-            class="ml-3"
-            type="text"
-            v-model="nombre"
-            placeholder="Nombre"
-            :rules="[reglas.requerido]"
-          />
-        </v-row>
-      <v-row align="center">
-        <label for="">A. Paterno:</label>
-        <v-text-field
-          class="ml-3"
-          type="text"
-          v-model="apaterno"
-          placeholder="Apellido Paterno"
-          :rules="[reglas.requerido]"
-        />
-      </v-row>
-      <v-row align="center">
-        <label for="">A. Materno:</label>
-        <v-text-field
-          class="ml-3"
-          type="text"
-          v-model="amaterno"
-          placeholder="Apellido Materno"
-        />
-      </v-row>
-      <v-row align="center">
-        <label for="">Correo Electronico:</label>
-        <v-text-field
-          class="ml-3"
-          type="text"
-          v-model="email"
-          placeholder="Correo Electronico (se toma como usuario)"
-          :rules="[reglas.requerido]"
-        />
-      </v-row>
-      <v-row align="center">
-        <label for="">Telefono:</label>
-        <v-text-field
-          class="ml-3"
-          type="phone"
-          v-model="telefono"
-          placeholder="Telefono"
-        />
-      </v-row>
-      <v-row align="center">
-          <label for="">Fecha:</label>
-          <v-text-field
-            class="ml-3"
-            v-model="fecha"
-            :rules="[reglas.requerido]"
-            readonly
-            @click="showDatePicker = true"
-          ></v-text-field>
-          <v-date-picker
-            v-model="fecha"
-            :rules="[reglas.requerido]"
-            v-if="showDatePicker"
-            @input="showDatePicker = false"
-          ></v-date-picker>
-      </v-row>
-      <v-row align="center">
-        <label for=""> Tratamiento:</label>
-        <v-text-field
-          class="ml-3"
-          type="text"
-          v-model="tratamiento"
-          placeholder="Escribe tu tratamiento"
-        />
-      </v-row>
-
-      <v-row align="center" justify="center">
-        <v-btn color="green" @click="registraUsuario">
-          Guardar
+      <v-btn depressed color="primary" @click="openCitaForm">
+        Agregar nueva cita
       </v-btn>
-      |
-      <v-btn color="red darken-1" @click="closeForm">
-          Cerrar Formulario
-        </v-btn>
-      </v-row>
 
-  </v-card-text>
-    </v-card>
-  </v-dialog>
+      <v-dialog v-model="showCitaFormDialog" max-width="600">
+        <v-card>
+          <v-card-title class="text-h5">Nueva cita</v-card-title>
+          <v-card-text>
+            <v-row align="center">
+              <label for="fecha">Fecha:</label>
+              <v-text-field
+                class="ml-3"
+                v-model="nuevaCita.fecha"
+                placeholder="Fecha"
+                :rules="[reglas.requerido]"
+                readonly
+                @click="showDatePicker = true"
+              ></v-text-field>
+              <v-date-picker
+                v-model="nuevaCita.fecha"
+                :rules="[reglas.requerido]"
+                v-if="showDatePicker"
+                @input="showDatePicker = false"
+              ></v-date-picker>
+            </v-row>
+            <!-- Agrega más campos según sea necesario -->
+            <v-row align="center">
+              <label for="hora">Hora:</label>
+              <v-text-field
+                class="ml-3"
+                v-model="nuevaCita.hora"
+                placeholder="Hora"
+                readonly
+                @click="showTimePicker = true"
+              ></v-text-field>
+              <v-time-picker
+                v-model="nuevaCita.hora"
+                full-width
+                @input="showTimePicker = false"
+                v-if="showTimePicker"
+              ></v-time-picker>
+            </v-row>
+            <v-row align="center">
+              <label for="motivo">Motivo:</label>
+              <v-text-field
+                class="ml-3"
+                v-model="nuevaCita.motivo"
+                placeholder="Motivo"
+                :rules="[reglas.requerido]"
+              ></v-text-field>
+            </v-row>
+            <v-row align="center">
+              <label for="doctor">Doctor:</label>
+              <v-select
+                class="ml-3"
+                v-model="nuevaCita.doctor"
+                :items="doctores"
+                item-value="usuario"
+                item-text="nombre"
+                :rules="[reglas.requerido]"
+              ></v-select>
+            </v-row>
+            <v-row align="center">
+              <label for="paciente">Paciente:</label>
+              <v-select
+                class="ml-3"
+                v-model="nuevaCita.paciente"
+                :items="pacientes"
+                item-value="email"
+                item-text="nombre"
+                :rules="[reglas.requerido]"
+              ></v-select>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-btn color="green" @click="agregarCita">Guardar</v-btn>
+              <v-btn color="red darken-1" @click="closeCitaForm"
+                >Cerrar Formulario</v-btn
+              >
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
 
       <v-row>
         <v-data-table :headers="headers" :items="citas" elevation="2">
-          <template #[`item.Acciones`]="{ item }">
-            <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="red"
-                  icon
-                  @click="deleteUser(item.email)"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>mdi mdi-delete-circle-outline</v-icon>
-                </v-btn>
-              </template>
-              <span>
-                Borrar al usuario{{ item.nombre }}
-              </span>
-            </v-tooltip>
-
-            <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="blue darken-3"
-                  icon
-                  @click="editUser(item)"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>mdi mdi-pencil-circle-outline</v-icon>
-                </v-btn>
-              </template>
-              <span>
-                Editar al usuario{{ item.nombre }}
-              </span>
-            </v-tooltip>
-          </template>
         </v-data-table>
-        
-        <v-dialog v-model="showErrorDialog" max-width="400">
-    <v-card>
-      <v-card-title>Error</v-card-title>
-      <v-card-text>
-        No existe paciente, regístrese en pacientes primero.
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="showErrorDialog = false">Aceptar</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
-        <v-dialog v-model="dialog" max-width="290">
-          <v-card>
-            <v-card-title class="text-h5">Borrar Usuarios</v-card-title>
-            <v-card-text>¿Estas seguro de lo que quieres borrar?</v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="dialog = false">
-                Cancelar
-              </v-btn>
-              <v-btn color="green darken-1" text @click="borrar">
-                Borrar
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="dialogEdit" max-width="600">
-          <v-card>
-            <v-card-title class="text-h5">Editar Usuario</v-card-title>
-            <v-card-text>
-              <v-form ref="frmRegistro" v-model="frmRegistro">
-                <v-row align="center">
-                  <label for="">Nombre(s):</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="text"
-                    v-model="editUserData.nombre"
-                    placeholder="Nombre"
-                    :rules="[reglas.requerido]"
-                  />
-                </v-row>
-                <v-row align="center">
-                  <label for="">A. Paterno:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="text"
-                    v-model="editUserData.apaterno"
-                    placeholder="Apellido Paterno"
-                    :rules="[reglas.requerido]"
-                  />
-                </v-row>
-                <v-row align="center">
-                  <label for="">A. Materno:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="text"
-                    v-model="editUserData.amaterno"
-                    placeholder="Apellido Materno"
-                  />
-                </v-row>
-                <v-row align="center" style="display: none;">
-                  <label for="">Correo Electronico:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="text"
-                    v-model="editUserData.email"
-                    placeholder="Correo Electronico (se toma como usuario)"
-                    :rules="[reglas.requerido]"
-                  />
-                </v-row>
-                <v-row align="center">
-                  <label for="">Telefono:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="phone"
-                    v-model="editUserData.telefono"
-                    placeholder="Telefono"
-                  />
-                </v-row>
-                <v-row align="center">
-                  <label for="">Fecha:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="text"
-                    v-model="editUserData.fecha"
-                    placeholder="Fecha"
-                    readonly
-                    @click="showDatePickerEdit = true"
-                  ></v-text-field>
-                  <v-btn @click="showDatePickerEdit = true">Seleccionar Fecha</v-btn>
-                  <v-date-picker
-                    v-model="editUserData.fecha"
-                    v-if="showDatePickerEdit"
-                    @input="showDatePickerEdit = false"
-                  ></v-date-picker>
-                </v-row>
-                <v-row align="center">
-                  <label for="">Tratamiento:</label>
-                  <v-text-field
-                    class="ml-3"
-                    type="tratamiento"
-                    v-model="editUserData.tratamiento"
-                    placeholder="Tratamiento"
-                  />
-                </v-row>
-              </v-form>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="dialogEdit = false">
-                Cancelar
-              </v-btn>
-              <v-btn color="green darken-1" text @click="editar">
-                Editar
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
       </v-row>
     </v-app>
   </v-form>
@@ -279,199 +111,120 @@ export default {
   data() {
     return {
       headers: [
-        { text: 'Nombre', align: 'center', sortable: true, value: 'nombre' },
-        { text: 'A. Paterno', align: 'center', sortable: true, value: 'apaterno' },
-        { text: 'A. Materno', align: 'center', sortable: true, value: 'amaterno' },
-        { text: 'Telefono', align: 'center', sortable: false, value: 'telefono' },
-        { text: 'Email', align: 'center', sortable: true, value: 'email' },
-        { text: 'Fecha', align: 'center', sortable: true, value: 'fecha' },
-        { text: 'Tratamiento', align: 'center', sortable: true, value: 'tratamiento' },
-        { text: 'Acciones', align: 'center', sortable: false, value: 'Acciones' },
+        {
+          text: "Doctor",
+          align: "center",
+          sortable: true,
+          value: "doctor",
+        },
+        {
+          text: "Paciente",
+          align: "center",
+          sortable: true,
+          value: "paciente",
+        },
+        {
+          text: "Fecha",
+          align: "center",
+          sortable: true,
+          value: "fecha",
+        },
+        {
+          text: "Hora",
+          align: "center",
+          sortable: false,
+          value: "hora",
+        },
+        { 
+          text: "Motivo", 
+          align: "center", 
+          sortable: true, 
+          value: "motivo" },
       ],
       citas: [],
-      dialog: false,
-      fecha: null,
-      showDatePicker: false,
-      showDatePickerEdit: false,
-      showErrorDialog: false,
-      email: null,
-      editUserData: {},
-      dialogEdit: false,
-      reglas: {
-        requerido: value => !!value || 'Campo Requerido!!!',
-        cantidad: value => value.length > 8 || 'Minimo 9 Caractéres',
+
+      showCitaFormDialog: false,
+      nuevaCita: {
+        fecha: null,
+        hora: "",
+        motivo: "",
+        doctor: null,
+        paciente: null,
       },
-      frmRegistro: false,
-      showFormDialog: false, // Nueva propiedad para controlar la apertura/cierre del formulario
-      nombre: '',
-      apaterno: '',
-      amaterno: '',
-      telefono: '',
-      email: '',
-      fecha: '',
-      tratamiento: '',
+      doctores: [], // Lista de doctores obtenida del backend
+      pacientes: [], // Lista de pacientes obtenida del backend
+      reglas: {
+        requerido: (value) => !!value || "Campo Requerido!!!",
+      },
+      showDatePicker: false,
+      showTimePicker: false,
     };
   },
-  computed: {
-    newUser() {
-      return this.$store.state.newUser;
-    },
-    pageTitle() {
-      const currentRoute = this.$route.path;
 
-      switch (currentRoute) {
-        case '/dashboard':
-          return 'Dashboard';
-        case '/appointment':
-          return 'Appointment';
-        case '/patients':
-          return 'Patients';
-        case '/schedule':
-          return 'Schedule';
-        default:
-          return 'Unknown';
-      }
-    },
-  },
-  watch: {
-    newUser() {
-      if (this.newUser) {
-        this.citas = [];
-        this.loadUsers();
-        this.$store.commit('setNewUser', false);
-      }
-    },
-  },
   mounted() {
-    this.loadUsers();
+    this.loadCitas();
   },
+
   methods: {
-    async loadUsers() {
-      const citas = await fetch('http://localhost:5000/get-users');
-      const data = await citas.json();
-      if (data.alert === 'success') {
-        this.citas = data.citas;
-      }
-      console.log('@@@ citas => ', citas, data);
+    loadCitas() {
+      fetch("http://localhost:5000/get-citas")
+        .then((response) => response.json())
+        .then((data) => {
+          this.citas = data.citas;
+        })
+        .catch((error) => {
+          console.error("Error al obtener las citas:", error);
+        });
     },
-    deleteUser(email) {
-      console.log('@@@ delete user');
-      this.email = email;
-      this.dialog = true;
+
+    openCitaForm() {
+      this.showCitaFormDialog = true;
+      fetch("http://localhost:5000/get-doctores")
+        .then((response) => response.json())
+        .then((data) => {
+          this.doctores = data.doctores;
+        })
+        .catch((error) => {
+          console.error("Error al obtener los doctores:", error);
+        });
+
+      fetch("http://localhost:5000/get-pacientescitas")
+        .then((response) => response.json())
+        .then((data) => {
+          this.pacientes = data.pacientes;
+        })
+        .catch((error) => {
+          console.error("Error al obtener los doctores:", error);
+        });
     },
-    async borrar() {
-      const sendData = {
-        email: this.email,
+    closeCitaForm() {
+      // Lógica para cerrar el formulario de nueva cita
+      this.showCitaFormDialog = false;
+      this.nuevaCita = {
+        fecha: null,
+        hora: "",
+        motivo: "",
+        doctor: null,
+        paciente: null,
       };
-      const rawResponse = await fetch('http://localhost:5000/delete-user', {
-        method: 'POST',
+    },
+    agregarCita() {
+      fetch("http://localhost:5000/new-cita", {
+        method: "POST",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(sendData),
-      });
-      const res = await rawResponse.json();
-      if (res.alert === 'success') {
-        this.loadUsers();
-      }
-      this.dialog = false;
-    },
-    editUser(user) {
-      console.log('@@@ user =>', user);
-      this.editUserData.nombre = user.nombre;
-      this.editUserData.apaterno = user.apaterno;
-      this.editUserData.amaterno = user.amaterno;
-      this.editUserData.telefono = user.telefono;
-      this.editUserData.email = user.email;
-      this.editUserData.fecha = user.fecha;
-      this.editUserData.tratamiento = user.tratamiento;
-      this.showDatePickerEdit = false;
-      this.dialogEdit = true;
-    },
-    async editar() {
-      const valid = this.$refs.frmRegistro.validate();
-      if (valid) {
-        console.log('@@@ editUserData =>', this.editUserData);
-        const rawResponse = await fetch('http://localhost:5000/edit-user', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(this.editUserData),
+        body: JSON.stringify(this.nuevaCita),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Respuesta del backend:", data);
+          this.closeCitaForm();
+          this.loadCitas();
+        })
+        .catch((error) => {
+          console.error("Error al agregar la cita:", error);
         });
-        const res = await rawResponse.json();
-        this.loadUsers();
-        this.dialogEdit = false;
-        console.log('@@@ res =>', res);
-      }
-    },
-    async registraUsuario() {
-    this.frmRegistro = this.$refs.frmRegistro.validate();
-    if (this.frmRegistro) {
-      // Check if the entered name exists in the usuarios array
-      const usuarioExistente = this.usuarios.find(user => user.nombre === this.nombre);
-
-      if (usuarioExistente) {
-        // Registro el Usuario
-        const sendData = {
-          nombre: this.nombre,
-          apaterno: this.apaterno,
-          amaterno: this.amaterno,
-          email: this.email,
-          telefono: this.telefono,
-          fecha: this.fecha,
-          tratamiento: this.tratamiento,
-        };
-
-        // Send request to backend to add user to citas array
-        const rawResponse = await fetch('http://localhost:5000/new-user', {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(sendData),
-        });
-
-        const content = await rawResponse.json();
-
-        if (content.alert === 'success') {
-          this.nombre = '';
-          this.apaterno = '';
-          this.amaterno = '';
-          this.telefono = '';
-          this.email = '';
-          this.fecha = '';
-          this.tratamiento = '';
-          this.$store.commit('setNewUser', true);
-        } else if (content.alert === 'El usuario ya existe') {
-          // Handle case where user already exists
-        }
-        console.log('@@@ response =>', content);
-      } else {
-        // Notificacion de Error: Handle case where user does not exist
-        this.showErrorDialog = true;
-      }
-    } else {
-      // Notificacion de Error: Handle case where form validation fails
-      this.showErrorDialog = true;
-    }
-
-    // Cierra la ventana del formulario
-    this.showFormDialog = false;
-
-    // Actualiza los datos de la tabla
-    this.loadUsers();
-  },
-    openForm() {
-      this.showFormDialog = true;
-    },
-    closeForm() {
-      this.showFormDialog = false;
-      this.showDatePicker = false;
-      this.$refs.frmRegistro.resetValidation();
     },
   },
 };
