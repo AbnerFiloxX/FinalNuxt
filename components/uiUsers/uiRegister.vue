@@ -210,6 +210,7 @@ export default {
 
       editCitaData: {},
       dialogEditCita: false,
+      frmCitas: false,
 
       showCitaFormDialog: false,
       nuevaCita: {
@@ -231,8 +232,37 @@ export default {
     };
   },
 
+  watch: {
+    newUser() {
+      if (this.newUser) {
+        this.usuarios = [];
+        this.loadUsers();
+        this.$store.commit("setNewUser", false);
+      }
+    },
+  },
+
   mounted() {
     this.loadCitas();
+  },
+
+  computed: {
+    pageTitle() {
+      const currentRoute = this.$route.path;
+
+      switch (currentRoute) {
+        case "/dashboard":
+          return "Dashboard";
+        case "/appointment":
+          return "Appointment";
+        case "/patients":
+          return "Patients";
+        case "/schedule":
+          return "Schedule";
+        default:
+          return "Unknown";
+      }
+    },
   },
 
   methods: {
@@ -280,23 +310,39 @@ export default {
         estatus: "",
       };
     },
+
     agregarCita() {
-      fetch("http://localhost:5000/new-cita", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(this.nuevaCita),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Respuesta del backend:", data);
-          this.closeCitaForm();
-          this.loadCitas();
+      const citaData = {
+        fecha: this.nuevaCita.fecha,
+        hora: this.nuevaCita.hora,
+        motivo: this.nuevaCita.motivo,
+        doctor: this.nuevaCita.doctor,
+        paciente: this.nuevaCita.paciente,
+        clave: this.nuevaCita.clave,
+        estatus: this.nuevaCita.estatus,
+      };
+
+      const valid = this.$refs.frmCitas.validate();
+      if (valid) {
+        fetch("http://localhost:5000/new-cita", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(citaData),
         })
-        .catch((error) => {
-          console.error("Error al agregar la cita:", error);
-        });
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Respuesta del backend:", data);
+            this.closeCitaForm();
+            this.loadCitas();
+          })
+          .catch((error) => {
+            console.error("Error al agregar la cita:", error);
+          });
+      } else {
+        console.error("Formulario no válido");
+      }
     },
 
     async changeStatus(clave, nuevoEstatus) {
@@ -311,7 +357,16 @@ export default {
         });
         const res = await rawResponse.json();
         console.log("Respuesta del cambio de estatus:", res);
-        this.loadCitas();
+
+        // Actualizar localmente la lista de citas después de cambiar el estado
+        const citaIndex = this.citas.findIndex((cita) => cita.clave === clave);
+        if (citaIndex !== -1) {
+          this.citas[citaIndex].estatus = nuevoEstatus;
+        } else {
+          console.error(
+            "No se encontró la cita para actualizar el estado localmente"
+          );
+        }
       } catch (error) {
         console.error("Error al cambiar el estatus:", error);
       }

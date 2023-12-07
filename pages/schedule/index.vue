@@ -1,11 +1,8 @@
 <template>
     <div class="ma-5">
         <v-row>
-            <v-col cols="20">
+            <v-col>
                 <ui-Schedule />
-            </v-col>
-            <v-col cols="20">
-                AUN NO SE LE HACE NADA AL CALENDARIO COMO TAL
             </v-col>
         </v-row>
     </div>

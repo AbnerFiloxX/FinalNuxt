@@ -64,7 +64,7 @@
           <v-list-item-title class="text-h5 mb-1">
             Bienvenid@ de vuelta Doctor 
           </v-list-item-title>
-          <v-list-item-subtitle>Usted tiene {{ citasPendientes }} pacientes por atender.</v-list-item-subtitle>
+          <v-list-item-subtitle>Hay {{ citasPendientes }} citas en el sistema.</v-list-item-subtitle>
         </v-list-item-content>
 
         <div class="text-overline mb-4">
@@ -83,6 +83,7 @@
           outlined
           rounded
           text
+          @click="irAppointments"
         >
           Ir a Appointments
         </v-btn>
@@ -147,5 +148,11 @@ export default {
       console.error('Error al realizar la solicitud:', error);
     });
 },
+
+methods: {
+  irAppointments() {
+      this.$router.push("/appointment"); // Esta será la ruta de registro
+    },
+}
 }
 </script>

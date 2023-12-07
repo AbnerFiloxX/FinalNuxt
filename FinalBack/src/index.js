@@ -331,17 +331,106 @@ app.post('/edit-paciente', async (req, res) => {
 })
 
 // Agregar nueva cita
-app.post('/new-cita', async (req, res) => {
-    try {
-        const nuevaCita = req.body;
-        const citasCollection = collection(db, 'citas');
-        await setDoc(doc(citasCollection), nuevaCita);
-        res.json({ 'mensaje': 'Cita agregada correctamente' });
-    } catch (error) {
-        console.error('Error al agregar la cita:', error);
-        res.status(500).json({ 'error': 'Error al agregar la cita' });
+app.post('/new-cita', (req, res) => {
+    let { fecha, hora, motivo, doctor, paciente, clave, estatus } = req.body;
+
+    if (!fecha || !hora || !motivo || !doctor || !paciente || !clave || !estatus) {
+        res.json({
+            'alert': 'Faltan campos por completar'
+        });
+    } else {
+        const citas = collection(db, 'citas');
+
+        getDoc(doc(citas, clave))
+            .then((cita) => {
+                if (cita.exists()) {
+                    res.json({
+                        'alert': 'La cita ya existe'
+                    });
+                } else {
+                    const citaData = {
+                        fecha,
+                        hora,
+                        motivo,
+                        doctor,
+                        paciente,
+                        clave,
+                        estatus,
+                    };
+
+                    setDoc(doc(citas, clave), citaData)
+                        .then(() => {
+                            res.json({
+                                'alert': 'success',
+                                'citaData': citaData
+                            });
+                        })
+                        .catch((error) => {
+                            res.json({
+                                'alert': 'Error al agregar la cita',
+                                'error': error.message
+                            });
+                        });
+                }
+            })
+            .catch((error) => {
+                res.json({
+                    'alert': 'Error de conexión',
+                    'error': error.message
+                });
+            });
     }
 });
+
+app.post('/new-paciente', (req, res) => {
+    let { nombre, apaterno, amaterno, email, telefono, fechanacimiento, tratamiento } = req.body
+
+    if (!nombre.length) {
+        res.json({
+            'alert': 'Falta de agregar nombre'
+        })
+    } else if (!apaterno.length) {
+        res.json({
+            'alert': 'Falta agregar a paterno'
+        })
+    } else if (!email.length) {
+        res.json({
+            'alert': 'Falta de agregar el usuario'
+        })
+    }
+
+    const pacientes = collection(db, 'pacientes')
+
+    getDoc(doc(pacientes, email)).then(user => {
+        if (user.exists()) {
+            res.json({
+                'alert': 'El usuario ya existe'
+            })
+        } else {
+
+            const data = {
+                nombre,
+                apaterno,
+                amaterno,
+                email,
+                telefono,
+                fechanacimiento,
+                tratamiento,
+            };
+
+            setDoc(doc(pacientes, email), data).then(data => {
+                res.json({
+                    'alert': 'success',
+                    data
+                })
+            })
+        }
+    }).catch(error => {
+        res.json({
+            'alert': 'Error de Conexion'
+        })
+    })
+})
 
 // Funcion para cambiar de estado
 app.post('/change-status', async (req, res) => {
