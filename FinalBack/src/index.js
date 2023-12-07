@@ -334,14 +334,33 @@ app.post('/edit-paciente', async (req, res) => {
 app.post('/new-cita', async (req, res) => {
     try {
         const nuevaCita = req.body;
-        // Aquí se debe realizar la lógica para guardar la cita en la base de datos
-        // Por ejemplo:
         const citasCollection = collection(db, 'citas');
         await setDoc(doc(citasCollection), nuevaCita);
         res.json({ 'mensaje': 'Cita agregada correctamente' });
     } catch (error) {
         console.error('Error al agregar la cita:', error);
         res.status(500).json({ 'error': 'Error al agregar la cita' });
+    }
+});
+
+// Funcion para cambiar de estado
+app.post('/change-status', async (req, res) => {
+    try {
+        const { clave, estatus } = req.body;
+
+        const citasCollection = collection(db, 'citas');
+        const citaRef = doc(citasCollection, clave);
+        const citaSnapshot = await getDoc(citaRef);
+
+        if (!citaSnapshot.exists()) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        await updateDoc(citaRef, { estatus: estatus });
+        return res.status(200).json({ message: 'Estatus de la cita actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al cambiar el estatus:', error);
+        return res.status(500).json({ error: 'Error al cambiar el estatus de la cita' });
     }
 });
 

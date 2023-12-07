@@ -40,7 +40,6 @@
                 @input="showDatePicker = false"
               ></v-date-picker>
             </v-row>
-            <!-- Agrega más campos según sea necesario -->
             <v-row align="center">
               <label for="hora">Hora:</label>
               <v-text-field
@@ -88,6 +87,24 @@
                 :rules="[reglas.requerido]"
               ></v-select>
             </v-row>
+            <v-row align="center">
+              <label for="motivo">Palabra clave:</label>
+              <v-text-field
+                class="ml-3"
+                v-model="nuevaCita.clave"
+                placeholder="Clave"
+                :rules="[reglas.requerido]"
+              ></v-text-field>
+            </v-row>
+            <v-row align="center">
+              <label for="estatus">Estatus:</label>
+              <v-select
+                class="ml-3"
+                v-model="nuevaCita.estatus"
+                :items="['Activa', 'Cancelada']"
+                :rules="[reglas.requerido]"
+              ></v-select>
+            </v-row>
             <v-row align="center" justify="center">
               <v-btn color="green" @click="agregarCita">Guardar</v-btn>
               <v-btn color="red darken-1" @click="closeCitaForm"
@@ -100,6 +117,35 @@
 
       <v-row>
         <v-data-table :headers="headers" :items="citas" elevation="2">
+          <template v-slot:[`item.Acciones`]="{ item }">
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-if="item.estatus !== 'Activa'"
+                  color="green"
+                  icon
+                  @click="changeStatus(item.clave, 'Activa')"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi mdi-checkbox-marked-circle-outline</v-icon>
+                </v-btn>
+                <v-btn
+                  v-if="item.estatus !== 'Cancelada'"
+                  color="red"
+                  icon
+                  @click="changeStatus(item.clave, 'Cancelada')"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>mdi mdi-cancel</v-icon>
+                </v-btn>
+              </template>
+              <span>
+                Cambiar estatus de {{ item.paciente }} del {{ item.fecha }}
+              </span>
+            </v-tooltip>
+          </template>
         </v-data-table>
       </v-row>
     </v-app>
@@ -135,13 +181,35 @@ export default {
           sortable: false,
           value: "hora",
         },
-        { 
-          text: "Motivo", 
-          align: "center", 
-          sortable: true, 
-          value: "motivo" },
+        {
+          text: "Motivo",
+          align: "center",
+          sortable: true,
+          value: "motivo",
+        },
+        {
+          text: "Palabra clave",
+          align: "center",
+          sortable: true,
+          value: "clave",
+        },
+        {
+          text: "Estatus",
+          align: "center",
+          sortable: true,
+          value: "estatus",
+        },
+        {
+          text: "Acciones",
+          align: "center",
+          sortable: false,
+          value: "Acciones",
+        },
       ],
       citas: [],
+
+      editCitaData: {},
+      dialogEditCita: false,
 
       showCitaFormDialog: false,
       nuevaCita: {
@@ -150,6 +218,8 @@ export default {
         motivo: "",
         doctor: null,
         paciente: null,
+        clave: "",
+        estatus: "",
       },
       doctores: [], // Lista de doctores obtenida del backend
       pacientes: [], // Lista de pacientes obtenida del backend
@@ -206,6 +276,8 @@ export default {
         motivo: "",
         doctor: null,
         paciente: null,
+        clave: "",
+        estatus: "",
       };
     },
     agregarCita() {
@@ -225,6 +297,24 @@ export default {
         .catch((error) => {
           console.error("Error al agregar la cita:", error);
         });
+    },
+
+    async changeStatus(clave, nuevoEstatus) {
+      try {
+        const rawResponse = await fetch("http://localhost:5000/change-status", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ clave, estatus: nuevoEstatus }),
+        });
+        const res = await rawResponse.json();
+        console.log("Respuesta del cambio de estatus:", res);
+        this.loadCitas();
+      } catch (error) {
+        console.error("Error al cambiar el estatus:", error);
+      }
     },
   },
 };
